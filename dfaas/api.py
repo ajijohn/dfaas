@@ -6,8 +6,7 @@ except :
     import json
 
 
-from httplib2 import http
-
+import requests
 
 __all__ = [
     'DFAASApiClient'
@@ -38,7 +37,7 @@ class HttpApiClient(object):
 
     def __init__(self, api_key, base_url):
         """Initialize base http client."""
-        self.conn = http()
+        #self.conn = http()
         # DFAAS API key
         self.api_key = api_key
         #base url 
@@ -51,17 +50,13 @@ class HttpApiClient(object):
         Results are expected to be given in JSON format
         and are parsed to python data structures.
         """
-        request_params = urllib.urlencode(kwargs)
-        request_params = request_params.replace('%28', '').replace('%29', '')
 
-        uri = '%s%s?api_key=%s&%s' % \
-            (self.base_url, service_type, self.api_key, request_params)
-        header, response = self.conn.request(uri, method='GET')
-        return header, response
+        #uri = '%s%s?%s' % (self.base_url, service_type, self._get_params(**kwargs))
+        uri = '%s%s?api_key=%s' % \
+            (self.base_url, service_type, self.api_key)
+        response = requests.get(uri, params=kwargs)
+        return response.headers, response
 
-    def _http_uri_request(self, uri):
-        header, response = self.conn.request(uri, method='GET')
-        return header, response
 
     def _is_http_response_ok(self, response):
         return response['status'] == '200' or response['status'] == 200
@@ -87,11 +82,10 @@ class HttpApiClient(object):
 
 
     def _create_query(self, category_type, params):
-        header, content = self._http_request(category_type + '/', **params)
-        resp = json.loads(content)
-        if not self._is_http_response_ok(header):
-            error = resp.get('error_message', 'Unknown Error')
-            raise HttpException(header.status, header.reason, error) 
+        header, response = self._http_request(category_type , **params)
+        resp =  response.text
+        if not (response.status_code == requests.codes.ok):
+            raise response.raise_for_status()
         return resp
 
 
@@ -174,3 +168,10 @@ class DFAASApiClient(HttpApiClient):
 
 
 ################################################################################    
+if __name__ == '__main__':
+    print("Please enter DFAAS api key with IP(With Port)")
+    KEY = 'test'
+    IP='localhost:8008/'
+    dfaas_client = DFAASApiClient(KEY,IP)
+    job_status = dfaas_client.status(tracking = '3e1613c0-21e2-4c1a-ad9c-45fb9370c1a5')
+    print("Job Status is " + job_status )

@@ -1,4 +1,5 @@
 from dfaas import DFAASApiClient
+
 import sys
 import unittest
 
