@@ -1,3 +1,4 @@
+
 import urllib
 
 try:
@@ -61,7 +62,7 @@ class HttpApiClient(object):
     def _is_http_response_ok(self, response):
         return response['status'] == '200' or response['status'] == 200
 
-    def _get_params(self, regions = None, subpops = None, format = None, type = None,tracking = None):
+    def _get_params(self, regions = None, subpops = None, format = None, type = None,tracking = None, nfs=None, active=None):
 
 
         params = {}
@@ -76,6 +77,10 @@ class HttpApiClient(object):
             params['tracking'] = tracking
         if type:
             params['type'] = type
+        if nfs:
+            params['nfs'] = nfs
+        if active:
+            params['active'] = active
 
 
         return params
@@ -100,7 +105,7 @@ class DFAASApiClient(HttpApiClient):
         super(DFAASApiClient, self).__init__(api_key, base_url)
 
 
-    def spawn(self, regions = None, subpops = None, format = None, type = None):
+    def spawn(self, regions = None, subpops = None, format = None, type = None, nfs=None):
         """
         Spawns/Starts a filtering job in DFAAS
         # For eg regions=1:900-1000&&subpops=CHB&format=reformat&nfs=yes
@@ -123,7 +128,7 @@ class DFAASApiClient(HttpApiClient):
           HttpException with the error message from the server
         """
 
-        params = self._get_params(regions = regions, subpops = subpops, format = format, type = type)
+        params = self._get_params(regions = regions, subpops = subpops, format = format, type = type, nfs=nfs)
 
         return self._create_query('spawn', params)
 
@@ -183,12 +188,30 @@ class DFAASApiClient(HttpApiClient):
 
         return self._create_query('insight', params)
 
+    def poke(self, active=None):
+        """
+        Stats of the Job
+
+        Args:
+            active          : Whether to select active workers
+              type : [bool]
+        Returns:
+          Basic status of the celery workers
+        Raises:
+          HttpException with the error message from the server
+        """
+
+        params =  self._get_params(active = active)
+
+        return self._create_query('poke', params)
+
+
 
 ################################################################################    
 if __name__ == '__main__':
     print("Please enter DFAAS api key with IP(With Port)")
     KEY = 'test'
-    IP='localhost:8008/'
+    IP='localhost:8888/'
     dfaas_client = DFAASApiClient(KEY,IP)
     job_status = dfaas_client.status(tracking = '3e1613c0-21e2-4c1a-ad9c-45fb9370c1a5')
     print("Job Status is " + job_status )
