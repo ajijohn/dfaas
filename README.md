@@ -12,6 +12,8 @@ from dfaas.api import DFAASApiClient
 ## DFAAS API
 
 ```python
+#KEY = 'test'
+#IP='localhost:8008/'
 dfaas_client = DFAASApiClient(KEY,IP)
 ```
 
@@ -23,9 +25,6 @@ dfaasworkers = dfaas_client.poke(active="True")
 
 ## Submit a filtering job
 ```python
-from dfaas.api import DFAASApiClient
-dfaas_client = DFAASApiClient(KEY,IP)
-
 #regions=1:900-1000&&subpops=CHB&format=reformat&nfs=yes
 job_tracking_id = dfaas_client.spawn(regions = '1:900-1000', subpops = 'CHB', format = 'reformat',nfs='yes')
 print("Tracking id " + job_tracking_id)
@@ -45,7 +44,15 @@ dfaas_insights = dfaas_client.insight(tracking = job_tracking_id,type = 'through
 ### Get details of your job.
 ```python
 job_details = dfaas_client.get_details(tracking = job_tracking_id,audit = 'True')
+
 ```
+
+
+### Get detail of all the jobs.
+```python
+jobs = dfaas_client.jobs()
+```
+
 
 
 

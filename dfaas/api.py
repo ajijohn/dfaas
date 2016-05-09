@@ -144,13 +144,30 @@ class DFAASApiClient(HttpApiClient):
 
         return self._create_query('status', params)
 
+    def jobs(self, tracking=None):
+        """
+        Returns the details of all the jobs.
+
+        Args:
+          (Optional) Tracking Id
+
+        Returns:
+          All the jobs
+
+        Raises:
+          HttpException with the error message from the server
+        """
+        params = self._get_params(tracking = tracking)
+
+        return self._create_query('jobs', params)
+
     def insight(self, tracking=None, type=None):
         """
         Stats of the Job
 
         
         Args: 
-            tracking          : Trackig Id
+            tracking          : Tracking Id
               type : [string]
             type          : Type of metric
               type : [string]
@@ -175,3 +192,10 @@ if __name__ == '__main__':
     dfaas_client = DFAASApiClient(KEY,IP)
     job_status = dfaas_client.status(tracking = '3e1613c0-21e2-4c1a-ad9c-45fb9370c1a5')
     print("Job Status is " + job_status )
+    #With Tracking
+    #jobs = dfaas_client.jobs(tracking = '3e1613c0-21e2-4c1a-ad9c-45fb9370c1a5')
+
+    #Without Tracking
+    jobs = dfaas_client.jobs()
+
+    print("Jobs " + jobs )
