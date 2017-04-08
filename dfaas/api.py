@@ -62,26 +62,32 @@ class HttpApiClient(object):
     def _is_http_response_ok(self, response):
         return response['status'] == '200' or response['status'] == 200
 
-    def _get_params(self, regions = None, subpops = None, format = None, type = None,tracking = None, nfs=None, active=None):
+    def _get_params(self, regions = None, subpops = None, format = None, type = None,tracking = None, nfs=None,
+                    active=None, seq=None, minTlen=None, fields = None):
 
 
         params = {}
 
+        if tracking:
+            params['tracking'] = tracking
+        if type:
+            params['type'] = type
+        if fields:
+            params['fields'] = fields
         if regions:
             params['regions'] = regions
         if subpops:
             params['subpops'] = subpops
         if format:
             params['format'] = format
-        if tracking:
-            params['tracking'] = tracking
-        if type:
-            params['type'] = type
         if nfs:
             params['nfs'] = nfs
         if active:
             params['active'] = active
-
+        if minTlen:
+            params['minTlen'] = minTlen
+        if seq:
+            params['seq'] = seq
 
         return params
 
@@ -105,7 +111,8 @@ class DFAASApiClient(HttpApiClient):
         super(DFAASApiClient, self).__init__(api_key, base_url)
 
 
-    def spawn(self, regions = None, subpops = None, format = None, type = None, nfs=None):
+    def spawn(self, regions = None, subpops = None, format = None, type = None, nfs=None, seq=None,
+              minTlen = None):
         """
         Spawns/Starts a filtering job in DFAAS
         # For eg regions=1:900-1000&&subpops=CHB&format=reformat&nfs=yes
@@ -128,9 +135,12 @@ class DFAASApiClient(HttpApiClient):
           HttpException with the error message from the server
         """
 
-        params = self._get_params(regions = regions, subpops = subpops, format = format, type = type, nfs=nfs)
-
-        return self._create_query('spawn', params)
+        params = self._get_params(regions = regions, subpops = subpops, format = format, type = type, nfs=nfs, seq=seq, minTlen=minTlen)
+        response = self._create_query('spawn', params)
+        if(response.split()[0] == "Submitted"):
+            return response.split('.')[1]
+        else:
+            return response
 
     def status(self, tracking=None):
         """
@@ -149,7 +159,7 @@ class DFAASApiClient(HttpApiClient):
 
         return self._create_query('status', params)
 
-    def jobs(self, tracking=None):
+    def jobs(self, tracking=None, fields = None):
         """
         Returns the details of all the jobs.
 
@@ -162,7 +172,7 @@ class DFAASApiClient(HttpApiClient):
         Raises:
           HttpException with the error message from the server
         """
-        params = self._get_params(tracking = tracking)
+        params = self._get_params(tracking = tracking, fields = fields)
 
         return self._create_query('jobs', params)
 
