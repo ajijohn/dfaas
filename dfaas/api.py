@@ -63,7 +63,8 @@ class HttpApiClient(object):
         return response['status'] == '200' or response['status'] == 200
 
     def _get_params(self, regions = None, subpops = None, format = None, type = None,tracking = None, nfs=None,
-                    active=None, seq=None, minTlen=None, output_destination = None, fields = None):
+                    active=None, seq=None, minTlen=None, output_destination = None, fields = None, filepath=None,
+                    num_files=None):
 
         params = {}
 
@@ -91,6 +92,10 @@ class HttpApiClient(object):
             params['minTlen'] = minTlen
         if seq:
             params['seq'] = seq
+        if filepath:
+            params['filepath'] = filepath
+        if num_files:
+            params['num_files'] = num_files
 
         return params
 
@@ -115,7 +120,7 @@ class DFAASApiClient(HttpApiClient):
 
 
     def spawn(self, regions = None, subpops = None, format = None, type = None, nfs=None, seq=None,
-              minTlen = None, output_destination = None):
+              minTlen = None, output_destination = None, num_files = None):
         """
         Spawns/Starts a filtering job in DFAAS
         # For eg regions=1:900-1000&&subpops=CHB&format=reformat&nfs=yes
@@ -139,7 +144,7 @@ class DFAASApiClient(HttpApiClient):
         """
 
         params = self._get_params(regions = regions, subpops = subpops, format = format, type = type, nfs=nfs, seq=seq,
-                                  minTlen=minTlen, output_destination=output_destination)
+                                  minTlen=minTlen, output_destination=output_destination, num_files=num_files)
         response = self._create_query('spawn', params)
         if(response.split()[0] == "Submitted"):
             return response.split('.')[1]
